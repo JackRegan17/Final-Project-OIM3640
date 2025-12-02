@@ -1,46 +1,105 @@
+# app/services.py
 import requests
+import pandas as pd
+from typing import List, Optional, Dict
 
-def fetch_player_stats(player_name: str):
+MLB_SEARCH_URL = "https://statsapi.mlb.com/api/v1/people/search"
+MLB_STATS_URL = "https://statsapi.mlb.com/api/v1/people/{player_id}/stats"
+MLB_PEOPLE_URL = "https://statsapi.mlb.com/api/v1/people/{player_id}"
+
+
+# -----------------------------------------------------------
+# SEARCH PLAYERS BY NAME
+# -----------------------------------------------------------
+def search_players_by_name(name: str) -> List[Dict]:
     """
-    Fetches player stats from MLB Stats API by player name.
-    Returns a dict or None if player not found.
+    Search MLB players by name.
+    Returns a list of dicts containing minimal metadata.
     """
+    params = {"names": name}
+    resp = requests.get(MLB_SEARCH_URL, params=params, timeout=10)
+    resp.raise_for_status()
+    data = resp.json()
 
-    # --- 1️⃣ Search for the player ID ---
-    search_url = "https://statsapi.mlb.com/api/v1/people/search"
-    search_params = {"names": player_name}
+    results = []
+    for p in data.get("people", []):
+        results.append({
+            "id": p.get("id"),
+            "fullName": p.get("fullName"),
+            "currentTeam": p.get("currentTeam", {}).get("name") if p.get("currentTeam") else None
+        })
 
-    search_response = requests.get(search_url, params=search_params)
-    search_data = search_response.json()
+    return results
 
-    # No players found
-    if "people" not in search_data or len(search_data["people"]) == 0:
-        return None
 
-    player_id = search_data["people"][0]["id"]
-
-    # --- 2️⃣ Fetch stats for that player ---
-    stats_url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats"
-    stats_params = {
-        "stats": "career",
+# -----------------------------------------------------------
+# FETCH STATS
+# -----------------------------------------------------------
+def fetch_player_stats(player_id: int, scope: str = "career", season: Optional[int] = None) -> Optional[pd.DataFrame]:
+    """
+    Fetch hitting stats for a player.
+    """
+    params = {
+        "stats": scope,
         "group": "hitting"
     }
+    if scope == "season" and season:
+        params["season"] = season
 
-    stats_response = requests.get(stats_url, params=stats_params)
-    stats_data = stats_response.json()
+    resp = requests.get(MLB_STATS_URL.format(player_id=player_id), params=params, timeout=10)
+    resp.raise_for_status()
+    data = resp.json()
 
-    # No stats available
-    if "stats" not in stats_data or len(stats_data["stats"]) == 0:
+    stats_list = data.get("stats", [])
+    if not stats_list:
         return None
 
-    splits = stats_data["stats"][0].get("splits", [])
-    if len(splits) == 0:
+    splits = stats_list[0].get("splits", [])
+    if not splits:
         return None
 
-    # Return the FIRST split, which contains the numbers
+    stat_dict = splits[0].get("stat", {})
+    if not stat_dict:
+        return None
+
+    df = pd.DataFrame([stat_dict])
+    df.insert(0, "player_id", player_id)
+    return df
+
+
+# -----------------------------------------------------------
+# PLAYER METADATA
+# -----------------------------------------------------------
+def get_player_metadata(player_id: int) -> Dict:
+    """
+    Returns base metadata: fullName, position, team name, teamId
+    """
+    resp = requests.get(MLB_PEOPLE_URL.format(player_id=player_id), timeout=10)
+    resp.raise_for_status()
+    data = resp.json()
+
+    people = data.get("people", [])
+    if not people:
+        return {}
+
+    p = people[0]
+
     return {
-        "player_name": player_name.title(),
-        "id": player_id,
-        "stats": splits[0]["stat"]
+        "id": p.get("id"),
+        "fullName": p.get("fullName"),
+        "primaryPosition": p.get("primaryPosition", {}).get("abbreviation"),
+        "currentTeam": p.get("currentTeam", {}).get("name") if p.get("currentTeam") else None,
+        "teamId": p.get("currentTeam", {}).get("id") if p.get("currentTeam") else None,
     }
+
+
+# -----------------------------------------------------------
+# TEAM LOGO
+# -----------------------------------------------------------
+def construct_team_logo_url(team_id: int, size: int = 150) -> str:
+    """
+    Returns the MLB team logo in SVG format.
+    """
+    return f"https://www.mlbstatic.com/team-logos/{team_id}.svg"
+
 

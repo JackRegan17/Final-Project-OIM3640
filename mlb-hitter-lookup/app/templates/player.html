@@ -1,25 +1,128 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Player Stats</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="container mt-4">
+{% extends "base.html" %} {% block content %}
+<style>
+  /* --- MLB THEME COLORS --- */
+  :root {
+    --mlb-navy: #002d72;
+    --mlb-red: #d50032;
+    --mlb-white: #ffffff;
+    --mlb-grey: #f1f3f5;
+    --mlb-border: #c8ced8;
+  }
 
-    <h1>MLB Hitter Stats</h1>
+  /* Card container */
+  .card {
+    background: var(--mlb-white);
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--mlb-border);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    max-width: 700px;
+    margin: 0 auto;
+  }
 
-    {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-    {% else %}
-        <h2>{{ player }}</h2>
-        <div class="mt-3">
-            {{ table|safe }}
-        </div>
-    {% endif %}
+  /* Header */
+  .player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 3px solid var(--mlb-navy);
+    padding-bottom: 8px;
+  }
 
-    <a href="/" class="btn btn-primary mt-3">Search Again</a>
+  .player-header h2 {
+    margin: 0;
+    font-size: 24px;
+    color: var(--mlb-navy);
+    font-weight: 700;
+  }
 
-</body>
-</html>
+  /* Player Image */
+  .player-img {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
 
+  .player-img img {
+    border-radius: 10px;
+    border: 2px solid var(--mlb-navy);
+    width: 150px;
+  }
+
+  /* --- VERTICAL TABLE STYLING --- */
+  .stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 15px;
+    background: var(--mlb-grey);
+  }
+
+  .stats-table th {
+    width: 40%;
+    background: var(--mlb-navy);
+    color: white;
+    text-align: left;
+    padding: 10px;
+    border: 1px solid var(--mlb-border);
+    font-weight: 600;
+  }
+
+  .stats-table td {
+    background: white;
+    padding: 10px;
+    border: 1px solid var(--mlb-border);
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .stats-table tr:nth-child(even) td {
+    background: #eaf0f8;
+  }
+
+  .btn.secondary {
+    background: var(--mlb-red);
+    color: white;
+    padding: 7px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.2s;
+  }
+
+  .btn.secondary:hover {
+    background: #b40029;
+  }
+</style>
+
+<div class="card">
+  {% if error %}
+  <div class="alert">{{ error }}</div>
+  <a href="/" class="btn secondary">Back to search</a>
+
+  {% else %}
+  <div class="player-header">
+    <h2>{{ player }} — Hitting Stats</h2>
+    <a href="/" class="btn secondary">New search</a>
+  </div>
+
+  {% if team_logo %}
+  <div class="player-img">
+    <img src="{{ team_logo }}" alt="Team Logo" style="width: 140px" />
+  </div>
+  {% endif %}
+
+  <table class="stats-table">
+    <tbody>
+      {% for key, value in stats.items() %}
+      <tr>
+        <th>{{ key.replace('_',' ').title() }}</th>
+        <td>{{ value }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

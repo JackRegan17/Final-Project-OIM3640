@@ -1,10 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form action="/player" method="POST">
-    <label for="player_name">Enter Player Name:</label>
-    <input type="text" id="player_name" name="player_name" required>
+<div class="card">
+    <h2>Search for an MLB player</h2>
 
-    <button type="submit">Search</button>
-</form>
+    {% if error %}
+        <div class="alert">{{ error }}</div>
+    {% endif %}
+
+    <form action="{{ url_for('main.player_search') }}" method="POST">
+        <label for="player_name">Player name</label>
+        <input type="text" id="player_name" name="player_name" placeholder="e.g. Mike Trout" required>
+
+        <label for="scope">Stats scope</label>
+        <select id="scope" name="scope">
+            <option value="career">Career</option>
+            <option value="season">Season</option>
+        </select>
+
+        <label for="season">Season (year) — only used if "Season" selected</label>
+        <input type="text" id="season" name="season" placeholder="e.g. 2023">
+
+        <div style="display:flex; gap:8px; margin-top:8px;">
+            <button type="submit" class="btn">Search</button>
+            <a href="/" class="btn secondary" style="padding:10px 12px; display:inline-block; text-align:center;">Reset</a>
+        </div>
+    </form>
+</div>
 {% endblock %}
