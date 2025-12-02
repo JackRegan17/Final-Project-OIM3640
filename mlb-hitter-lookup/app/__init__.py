@@ -3,7 +3,8 @@ from flask import Flask
 def create_app():
     app = Flask(__name__)
 
-    from .routes import main_bp
-    app.register_blueprint(main_bp)
+    # import and register routes blueprint
+    from .routes import main
+    app.register_blueprint(main)
 
     return app

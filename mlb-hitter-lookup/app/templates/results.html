@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ player_name }} Stats</title>
+    <style>
+        .stats-table {
+            border-collapse: collapse;
+            width: 80%;
+            margin: 20px auto;
+        }
+        .stats-table th, .stats-table td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        .stats-table th {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stats for: {{ player_name }}</h1>
+
+    <div>
+        {{ table_html | safe }}
+    </div>
+
+    <br>
+    <a href="/">Search another player</a>
+</body>
+</html>
