@@ -8,6 +8,31 @@ from .services import (
     construct_team_logo_url
 )
 
+# Nice display labels for MLB stat keys
+STAT_LABELS = {
+    "player_id": "Player ID",
+    "gamesPlayed": "Games Played",
+    "groundOuts": "Groundouts",
+    "airOuts": "Airouts",
+    "homeRuns": "Home Runs",
+    "baseOnBalls": "Base on Balls",
+    "intentionalWalks": "Intentional Walks",
+    "hitByPitch": "Hit By Pitch",
+    "caughtStealing": "Caught Stealing",
+    "stolenBases": "Stolen Bases",
+    "stolenBasePercentage": "Stolen Base Percentage",
+    "caughtStealingPercentage": "Caught Stealing Percentage",
+    "groundIntoDoublePlay": "Ground Into Double Play",
+    "numberOfPitches": "Number of Pitches",
+    "plateAppearances": "Plate Appearances",
+    "totalBases": "Total Bases",
+    "leftOnBase": "Left On Base",
+    "groundOutsToAirouts": "Groundouts to Airouts",
+    "catchersInterference": "Catcher's Interference",
+    "atBatsPerHomeRun": "At Bats per Home Run",
+}
+
+
 main = Blueprint("main", __name__)
 
 # ----------------------------------------------------
@@ -96,24 +121,27 @@ def player_by_id(player_id):
     # Get player metadata
     meta = get_player_metadata(player_id)
 
-    # TEAM LOGO
+    # TEAM LOGO (kept as-is; fine if you don't see it yet)
     team_logo = None
     team_id = meta.get("teamId")
     if team_id:
         team_logo = construct_team_logo_url(team_id)
 
     # Convert stats DF → dictionary
-    stats_dict = df.iloc[0].to_dict()
+    raw_stats = df.iloc[0].to_dict()
+
+    # Build pretty labels
+    pretty_stats = {}
+    for key, value in raw_stats.items():
+        label = STAT_LABELS.get(key, key.replace("_", " ").title())
+        pretty_stats[label] = value
 
     return render_template(
         "player.html",
         player=meta.get("fullName", f"Player {player_id}"),
         meta=meta,
         team_logo=team_logo,
-        stats=stats_dict,
+        stats=pretty_stats,  # use pretty labels
         scope=scope,
         season=season_int
     )
-
-
-

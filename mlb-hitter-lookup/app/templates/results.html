@@ -4,18 +4,32 @@
     <title>{{ player_name }} Stats</title>
     <style>
         .stats-table {
-            border-collapse: collapse;
-            width: 80%;
-            margin: 20px auto;
-        }
-        .stats-table th, .stats-table td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
-        }
-        .stats-table th {
-            background-color: #e0e0e0;
-        }
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 15px;
+  background: var(--mlb-grey);
+  line-height: 1.4;
+}
+
+.stats-table th {
+  width: 45%;
+  background: var(--mlb-navy);
+  color: white;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--mlb-border);
+  font-weight: 600;
+}
+
+.stats-table td {
+  background: white;
+  padding: 10px 12px;
+  border: 1px solid var(--mlb-border);
+  text-align: right;
+  font-weight: 500;
+}
+
     </style>
 </head>
 <body>

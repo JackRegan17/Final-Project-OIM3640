@@ -96,10 +96,10 @@ def get_player_metadata(player_id: int) -> Dict:
 # -----------------------------------------------------------
 # TEAM LOGO
 # -----------------------------------------------------------
-def construct_team_logo_url(team_id: int, size: int = 150) -> str:
+
+def construct_team_logo_url(team_id: int) -> str:
     """
     Returns the MLB team logo in SVG format.
+    Uses MLB's team-cap-on-dark logo variant.
     """
-    return f"https://www.mlbstatic.com/team-logos/{team_id}.svg"
-
-
+    return f"https://www.mlbstatic.com/team-logos/team-cap-on-dark/{team_id}.svg"
